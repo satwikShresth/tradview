@@ -1,0 +1,54 @@
+{
+   "$schema": "https://turbo.build/schema.json",
+   "ui": "tui",
+   "globalDependencies": ["**/.env.*local", ".env"],
+   "tasks": {
+      "compile": {
+         "cache": false,
+         "outputs": [
+            "dist/**",
+            ".next/**",
+            "!.next/cache/**",
+            "build/**",
+            "out/**"
+         ]
+      },
+      "compile:watch": {
+         "cache": false,
+         "persistent": true
+      },
+      "dev": {
+         "dependsOn": ["compile"],
+         "cache": false,
+         "persistent": true
+      },
+      "test": {
+         "dependsOn": ["^compile"],
+         "outputs": ["coverage/**"],
+         "inputs": [
+            "src/**/*.tsx",
+            "src/**/*.ts",
+            "test/**/*.ts",
+            "test/**/*.tsx"
+         ]
+      },
+      "lint": {
+         "dependsOn": ["^lint"],
+         "outputs": []
+      },
+      "format": {
+         "outputs": [],
+         "cache": false
+      },
+      "type-check": {
+         "dependsOn": ["^compile"],
+         "outputs": []
+      },
+      "clean": {
+         "cache": false
+      },
+      "setup": {
+         "cache": false
+      }
+   }
+}

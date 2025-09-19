@@ -1,0 +1,42 @@
+{
+  "name": "@tradview/client",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev --turbopack",
+    "build": "next build --turbopack",
+    "start": "next start",
+    "generate": "buf generate",
+    "type-check": "tsc --noEmit",
+    "format": "biome format --write"
+  },
+  "dependencies": {
+    "@chakra-ui/react": "^3.27.0",
+    "@connectrpc/connect": "^2.1.0",
+    "@connectrpc/connect-query": "^2.2.0",
+    "@connectrpc/connect-web": "^2.1.0",
+    "@emotion/react": "^11.14.0",
+    "@t3-oss/env-nextjs": "^0.13.8",
+    "@tanstack/react-query": "^5.89.0",
+    "@tradview/proto": "workspace:*",
+    "@xstate/store": "^3.9.2",
+    "jiti": "^2.5.1",
+    "js-cookie": "^3.0.5",
+    "next": "15.5.3",
+    "next-themes": "^0.4.6",
+    "react": "19.1.0",
+    "react-dom": "19.1.0",
+    "react-icons": "^5.5.0",
+    "zod": "^4.1.9"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "2.2.0",
+    "@tanstack/react-form": "^1.21.1",
+    "@tanstack/react-query-devtools": "^5.89.0",
+    "@types/js-cookie": "^3.0.6",
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "typescript": "^5"
+  }
+}

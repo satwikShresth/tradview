@@ -1,0 +1,102 @@
+syntax = "proto3";
+
+package connectrpc.tradview;
+
+import "google/protobuf/timestamp.proto";
+
+message PriceData {
+  string ticker = 1;
+  string price = 2;
+  google.protobuf.Timestamp timestamp = 4;
+}
+
+message PriceStream {
+  repeated PriceData prices = 1;
+}
+
+message AddTickerRequest {
+  string ticker_id = 1;
+}
+
+message AddTickerResponse {
+  bool success = 1;
+  string message = 2;
+  string ticker_id = 3;
+}
+
+message RemoveTickerRequest {
+  string ticker_id = 1;
+}
+
+message RemoveTickerResponse {
+  bool success = 1;
+  string message = 2;
+  string ticker_id = 3;
+}
+
+// message GetActiveTickersRequest { }
+//
+// message GetActiveTickersResponse {
+//   repeated string ticker_ids = 1;
+//   int32 total_consumers = 2;
+// }
+
+message StreamPricesRequest { }
+
+message StreamPricesResponse {
+  PriceData price_data = 1;
+}
+
+message HealthCheckRequest { }
+
+message HealthCheckResponse {
+  bool healthy = 1;
+  string status = 2;
+  repeated string active_tickers = 3;
+}
+
+// JWT generation request
+// message GenerateJWTRequest {
+//   optional string user_id = 1;
+// }
+
+// JWT generation response
+// message GenerateJWTResponse {
+//   bool success = 1;
+//   string jwt_token = 2;            // The generated JWT token
+//   string message = 3;              // Success/error message
+//   optional string user_id = 4;     // Echo back the user ID
+// }
+
+service TradViewService {
+  rpc AddTicker(AddTickerRequest) returns (AddTickerResponse) {}
+  rpc RemoveTicker(RemoveTickerRequest) returns (RemoveTickerResponse) {}
+  rpc HealthCheck(HealthCheckRequest) returns (HealthCheckResponse) {}
+  // rpc GetActiveTickers(GetActiveTickersRequest) returns (GetActiveTickersResponse) {}
+  // rpc GenerateJWT(GenerateJWTRequest) returns (GenerateJWTResponse) {}
+  
+  // WebSocket
+  rpc StreamPrices(StreamPricesRequest) returns (stream StreamPricesResponse) {}
+}
+
+
+message GenerateTokenRequest { }
+
+message GenerateTokenResponse {
+  string token = 1;
+}
+
+message VerifyTokenRequest {
+  string token = 1;
+}
+
+message VerifyTokenResponse {
+  bool valid = 1;
+  string message = 2;
+  optional string uid = 3;
+}
+
+service AuthService {
+  rpc GenerateToken(GenerateTokenRequest) returns (GenerateTokenResponse) {}
+  rpc VerifyToken(VerifyTokenRequest) returns (VerifyTokenResponse) {}
+}

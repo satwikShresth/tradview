@@ -1,0 +1,39 @@
+{
+  "name": "@tradview/server",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "tsx watch --env-file=./.env src/index.ts",
+    "generate": "buf generate",
+    "build": "tsc --noEmit",
+    "test": "node --loader ts-node/esm --no-warnings --test connect.test.ts client.test.ts server.test.ts",
+    "ci": "npm run generate && npm run build && npm run test"
+  },
+  "main": "build/index.js",
+  "dependencies": {
+    "@connectrpc/connect": "^2.1.0",
+    "@connectrpc/connect-express": "^2.1.0",
+    "@t3-oss/env-core": "^0.13.8",
+    "@tradview/proto": "workspace:*",
+    "@types/jsonwebtoken": "^9.0.10",
+    "cors": "^2.8.5",
+    "express": "^5.1.0",
+    "express-jwt": "^8.5.1",
+    "fastq": "^1.19.1",
+    "jsonwebtoken": "^9.0.2",
+    "morgan": "^1.10.1",
+    "tsx": "^4.20.3",
+    "uuid": "^13.0.0",
+    "zod": "^4.1.9"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.55.0",
+    "@types/cors": "^2.8.19",
+    "@types/express": "^5.0.3",
+    "@types/morgan": "^1.9.10",
+    "@types/node": "^24.1.0",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.9.2"
+  }
+}

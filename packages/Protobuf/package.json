@@ -1,0 +1,24 @@
+{
+  "name": "@tradview/proto",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./generated/tradview_pb.ts"
+  },
+  "scripts": {
+    "build": "tsc",
+    "generate": "buf generate",
+    "type-check": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@bufbuild/buf": "^1.56.0",
+    "@bufbuild/protoc-gen-es": "^2.6.2",
+    "@types/cors": "^2.8.19",
+    "@types/node": "^24.1.0",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.9.2"
+  },
+  "dependencies": {
+    "@bufbuild/protobuf": "^2.8.0"
+  }
+}

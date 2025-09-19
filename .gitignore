@@ -1,0 +1,56 @@
+
+.DS_Store
+**/.DS_Store
+
+# Dependencies
+node_modules
+**/node_modules
+
+..husky/
+
+# Build
+build
+**/build
+
+# Dist
+**/dist
+**/dist.zip
+
+# Version.json
+**/version.json
+apps/client/public/version.json
+
+# Environments
+# .env
+# *.env*
+# **/environments
+# **/environments.zip
+
+# Config files
+**/environments
+
+# System files
+.DS_Store
+**/.DS_Store
+
+
+# Sentry Config File
+.sentryclirc
+
+# Vercel
+.vercel
+**/.vercel
+
+# Logs and caches
+*.log
+.eslintcache
+
+# Package manager files
+package-lock.json
+
+# Credentials
+*credentials*
+*serviceAccount* 
+
+.turbo
+.turbo/**
