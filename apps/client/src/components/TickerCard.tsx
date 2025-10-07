@@ -1,26 +1,29 @@
 "use client"
-
 import React from 'react';
-import { Stat, Badge, HStack, VStack, Card, CloseButton } from '@chakra-ui/react';
+import { Stat, HStack, CloseButton } from '@chakra-ui/react';
 import { useSelector } from '@xstate/store/react';
 import { useMutation } from "@connectrpc/connect-query";
 import { TradViewService } from "@tradview/proto";
 import { toaster } from "@/components/ui/toaster";
-import { priceStore, type PriceData } from '@/stores/priceStore';
+import { priceStore } from '@/stores/priceStore';
+
 
 interface TickerCardProps {
   ticker: string;
 }
 
 export const TickerCard = React.memo(({ ticker }: TickerCardProps) => {
-  const priceData = useSelector(
+  const price = useSelector(
     priceStore,
-    (state) => state.context.tickers[ticker] as PriceData | undefined
+    (state) => state.context.tickers[ticker]?.price,
+    (a, b) => a === b
   );
+
 
   const removeTickerMutation = useMutation(TradViewService.method.removeTicker, {
     onSuccess: (response) => {
       if (response.success) {
+        console.log('[RemoveTicker] Successfully removed ticker:', ticker);
         priceStore.send({ type: 'removeTicker', ticker: ticker });
         toaster.create({
           title: "Ticker Removed Successfully",
@@ -30,6 +33,7 @@ export const TickerCard = React.memo(({ ticker }: TickerCardProps) => {
           closable: true,
         });
       } else {
+        console.error('[RemoveTicker] Server rejected removal:', response.message);
         toaster.create({
           title: "Failed to Remove Ticker",
           description: response.message || "Unknown error occurred",
@@ -40,6 +44,7 @@ export const TickerCard = React.memo(({ ticker }: TickerCardProps) => {
       }
     },
     onError: (error) => {
+      console.error('[RemoveTicker] Network error:', error.message);
       toaster.create({
         title: "Network Error",
         description: `Failed to connect to server: ${error.message}`,
@@ -54,70 +59,42 @@ export const TickerCard = React.memo(({ ticker }: TickerCardProps) => {
     removeTickerMutation.mutate({ tickerId: ticker });
   };
 
-  // Show loading state if no data for this ticker yet or price is empty
-  if (!priceData || !priceData.price) {
+  // Show loading state if no price data yet
+  if (!price) {
     return (
-      <Card.Root>
-        <Card.Body>
-          <Stat.Root>
-            <HStack justify="space-between" align="start">
-              <VStack align="start" gap={1} flex="1">
-                <Stat.Label fontSize="sm" fontWeight="medium" color="gray.600">
-                  {ticker}
-                </Stat.Label>
-                <Stat.ValueText fontSize="xl" color="gray.400">
-                  Loading...
-                </Stat.ValueText>
-              </VStack>
-              <CloseButton
-                size="sm"
-                onClick={handleRemove}
-                disabled={removeTickerMutation.isPending}
-              />
-            </HStack>
-          </Stat.Root>
-        </Card.Body>
-      </Card.Root>
+      <Stat.Root maxW="240px" borderWidth="1px" p="4" rounded="md">
+        <HStack justify="space-between">
+          <Stat.Label>{ticker}</Stat.Label>
+          <CloseButton
+            size="sm"
+            onClick={handleRemove}
+            disabled={removeTickerMutation.isPending}
+          />
+        </HStack>
+        <Stat.ValueText color="gray.400">Loading...</Stat.ValueText>
+      </Stat.Root>
     );
   }
 
-  const isPositive = priceData.change?.startsWith('+');
-  const isNegative = priceData.change?.startsWith('-');
-
   return (
-    <Card.Root>
-      <Card.Body>
-        <Stat.Root>
-          <HStack justify="space-between" align="start">
-            <VStack align="start" gap={2} flex="1">
-              <Stat.Label fontSize="md" fontWeight="medium">
-                {ticker}
-              </Stat.Label>
-              <Stat.ValueText fontSize="xl" fontWeight="semibold">
-                <HStack align='baseline'>
-                  {priceData.price} <Stat.ValueUnit>USD</Stat.ValueUnit>
-                </HStack>
-              </Stat.ValueText>
-              {priceData.change && (
-                <Badge
-                  colorPalette={isPositive ? "green" : isNegative ? "red" : "gray"}
-                  variant="subtle"
-                  size="sm"
-                >
-                  {isPositive && <Stat.UpIndicator />}
-                  {isNegative && <Stat.DownIndicator />}
-                  {priceData.change}
-                </Badge>
-              )}
-            </VStack>
-            <CloseButton
-              size="sm"
-              onClick={handleRemove}
-              disabled={removeTickerMutation.isPending}
-            />
-          </HStack>
-        </Stat.Root>
-      </Card.Body>
-    </Card.Root >
+    <Stat.Root borderWidth="1px" p="4" rounded="md">
+      <HStack justify="space-between">
+        <Stat.Label>{ticker}</Stat.Label>
+        <CloseButton
+          size="sm"
+          onClick={handleRemove}
+          disabled={removeTickerMutation.isPending}
+        />
+      </HStack>
+      <HStack gap="3">
+        <Stat.ValueText
+          key={price}
+          animation="scale-in 0.3s ease-out, pulse 0.5s ease-out 0.3s"
+        >
+          {price}
+          <Stat.ValueUnit>USD</Stat.ValueUnit>
+        </Stat.ValueText>
+      </HStack>
+    </Stat.Root >
   );
 });

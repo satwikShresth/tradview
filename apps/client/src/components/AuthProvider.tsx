@@ -13,7 +13,7 @@ import {
   Button
 } from "@chakra-ui/react";
 import { useQuery } from "@tanstack/react-query";
-import { getToken, verifyToken } from "@/queryOptions";
+import { getToken } from "@/queryOptions";
 
 export interface TokenResponse {
   token: string;
@@ -24,45 +24,38 @@ export const UserSessionContext = createContext<string | null>(null);
 export function AuthProvider({ children }: { children: ReactNode }) {
   const existingToken = typeof window !== 'undefined' ? Cookies.get(env.NEXT_PUBLIC_SESSION_COOKIE_NAME) : null;
 
-  const { data: tokenVerification, isLoading: isVerifying } = useQuery({
-    ...verifyToken(existingToken || ''),
-    enabled: !!existingToken,
-  });
+  console.log('[AuthProvider] Initializing with existing token:', existingToken ? 'Found' : 'Not found');
 
-  const shouldFetchNewToken = !existingToken || (tokenVerification && !tokenVerification.valid);
-
-  const { data: newToken, isLoading: isGenerating, isError, error, refetch } = useQuery({
+  const { data: token, isLoading, isError, error, refetch } = useQuery({
     ...getToken,
-    enabled: shouldFetchNewToken,
-    select: ({ token }) => {
-      if (existingToken && tokenVerification && !tokenVerification.valid) {
-        console.log('Purging invalid token:', tokenVerification.message);
-        Cookies.remove(
-          env.NEXT_PUBLIC_SESSION_COOKIE_NAME,
-          {
-            domain: env.NEXT_PUBLIC_COOKIE_DOMAIN !== 'localhost' ? env.NEXT_PUBLIC_COOKIE_DOMAIN : undefined,
-          }
-        );
+    enabled: !existingToken,
+    retry: 3,
+    select: (data: TokenResponse) => {
+      const tokenString = data.token;
+      // Set cookie on successful token generation
+      if (tokenString && !existingToken) {
+        console.log('[AuthProvider] Generated new token, setting cookie');
+        Cookies.set(env.NEXT_PUBLIC_SESSION_COOKIE_NAME, tokenString, {
+          expires: 7,
+          sameSite: 'strict'
+        });
       }
-
-      if (token && token !== existingToken) {
-        Cookies.set(
-          env.NEXT_PUBLIC_SESSION_COOKIE_NAME,
-          token,
-          {
-            expires: env.NEXT_PUBLIC_SESSION_EXPIRES_DAYS,
-            sameSite: 'lax',
-            secure: env.NEXT_PUBLIC_COOKIE_SECURE,
-            domain: env.NEXT_PUBLIC_COOKIE_DOMAIN !== 'localhost' ? env.NEXT_PUBLIC_COOKIE_DOMAIN : undefined,
-          });
-      }
-      return token
+      return tokenString;
     }
   });
 
-  const currentToken = existingToken && tokenVerification?.valid ? existingToken : newToken;
+  if (isError) {
+    console.error('[AuthProvider] Token generation failed:', error?.message);
+    Cookies.remove(env.NEXT_PUBLIC_SESSION_COOKIE_NAME);
+  }
 
-  const isLoading = isVerifying || isGenerating;
+  const currentToken = existingToken || token;
+  console.log('[AuthProvider] Current session state:', {
+    hasExistingToken: !!existingToken,
+    hasNewToken: !!token,
+    isLoading,
+    isError
+  });
 
   if (isLoading) {
     return (

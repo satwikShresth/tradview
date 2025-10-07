@@ -1,9 +1,8 @@
 {
    "$schema": "https://turbo.build/schema.json",
-   "ui": "tui",
    "globalDependencies": ["**/.env.*local", ".env"],
    "tasks": {
-      "compile": {
+      "build": {
          "cache": false,
          "outputs": [
             "dist/**",
@@ -18,9 +17,11 @@
          "persistent": true
       },
       "dev": {
-         "dependsOn": ["compile"],
          "cache": false,
          "persistent": true
+      },
+      "generate": {
+         "cache": false
       },
       "test": {
          "dependsOn": ["^compile"],
@@ -32,16 +33,11 @@
             "test/**/*.tsx"
          ]
       },
-      "lint": {
-         "dependsOn": ["^lint"],
-         "outputs": []
-      },
       "format": {
          "outputs": [],
          "cache": false
       },
       "type-check": {
-         "dependsOn": ["^compile"],
          "outputs": []
       },
       "clean": {

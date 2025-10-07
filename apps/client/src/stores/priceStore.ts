@@ -5,7 +5,6 @@ import { createStore } from "@xstate/store";
 export interface PriceData {
   ticker: string;
   price: string;
-  change?: string;
   timestamp?: Date;
   previousPrice?: string;
 }
@@ -14,44 +13,70 @@ export interface PriceStoreContext {
   tickers: Record<string, PriceData>;
 }
 
-export const priceStore = createStore({
+const store = createStore({
   context: {
     tickers: {},
   } as PriceStoreContext,
   on: {
+    handleStreamUpdate: (
+      context,
+      event: {
+        ticker: string;
+        rawData: any;
+      },
+    ) => {
+      const { ticker, rawData } = event;
+
+      // Store handles all validation and processing
+      if (!rawData?.price || rawData.price === "0.00") {
+        return context;
+      }
+
+      // Ensure ticker exists
+      if (!context.tickers[ticker]) {
+        context = {
+          ...context,
+          tickers: {
+            ...context.tickers,
+            [ticker]: {
+              ticker,
+              price: "",
+              timestamp: new Date(),
+            },
+          },
+        };
+      }
+
+      // Update ticker data
+      const priceData: PriceData = {
+        ticker,
+        price: rawData.price,
+        timestamp: rawData.timestamp
+          ? new Date(Number(rawData.timestamp.seconds) * 1000)
+          : new Date(),
+        previousPrice: context.tickers[ticker]?.price,
+      };
+
+      return {
+        ...context,
+        tickers: {
+          ...context.tickers,
+          [ticker]: priceData,
+        },
+      };
+    },
+
     updateTicker: (
       context,
       event: {
         ticker: string;
-        priceData: Omit<PriceData, "change" | "previousPrice">;
+        priceData: PriceData;
       },
     ) => {
       const existingTicker = context.tickers[event.ticker];
-      const currentPrice = parseFloat(event.priceData.price.replace(/,/g, "")); // Remove commas
-      const previousPrice = existingTicker
-        ? parseFloat(existingTicker.price.replace(/,/g, ""))
-        : currentPrice;
-
-      // Calculate change
-      let change: string | undefined;
-      if (
-        existingTicker &&
-        !isNaN(currentPrice) &&
-        !isNaN(previousPrice) &&
-        currentPrice !== previousPrice
-      ) {
-        const diff = currentPrice - previousPrice;
-        const percentChange = ((diff / previousPrice) * 100).toFixed(2);
-        const sign = diff > 0 ? "+" : "";
-        change = `${sign}${diff.toFixed(2)} (${sign}${percentChange}%)`;
-      } else {
-        // Preserve existing change if price hasn't changed
-        change = existingTicker?.change;
-      }
 
       const updatedPriceData: PriceData = {
         ...event.priceData,
-        change,
         previousPrice: existingTicker?.price,
       };
 
@@ -66,7 +91,7 @@ export const priceStore = createStore({
 
     addPlaceholderTicker: (context, event: { ticker: string }) => {
       if (context.tickers[event.ticker]) {
-        return context; 
+        return context;
       }
 
       return {
@@ -107,3 +132,5 @@ export const priceStore = createStore({
     }),
   },
 });
+
+export const priceStore = store;

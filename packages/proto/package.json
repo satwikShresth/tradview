@@ -6,9 +6,9 @@
     ".": "./generated/tradview_pb.ts"
   },
   "scripts": {
-    "build": "tsc",
-    "generate": "buf generate",
-    "type-check": "tsc --noEmit"
+    "build": "npx tsc",
+    "generate": "npx buf generate",
+    "type-check": "npx tsc --noEmit"
   },
   "devDependencies": {
     "@bufbuild/buf": "^1.56.0",

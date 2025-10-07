@@ -6,48 +6,25 @@ import { v7 } from 'uuid';
 import { env } from '../env';
 
 
-type JwtPayload = { uid: string };
 export default (router: ConnectRouter) =>
   router.service(AuthService, {
     generateToken: async (_req, _context) => {
-      console.log(`[GenerateToken] Generating new token`);
+      console.log(`[Auth] 🔑 Generating new JWT token...`);
 
       const uid = v7();
       if (!uid) {
+        console.error(`[Auth] ❌ Failed to generate UUID`);
         throw new ConnectError("Failed to generate uid", Code.Internal);
       }
 
       const token = jwt.sign({ uid }, env.JWT_SECRET, { algorithm: "HS256" });
 
       if (!token) {
+        console.error(`[Auth] ❌ Failed to sign JWT for uid: ${uid}`);
         throw new ConnectError("Failed to generate JWT", Code.Internal);
       }
 
-      console.log(`[GenerateToken] Token generated for uid: ${uid}`);
+      console.log(`[Auth] ✅ JWT token successfully generated for uid: ${uid.substring(0, 8)}...`);
       return { token };
-    },
-
-    verifyToken: async (req, _context) => {
-      console.log(`[VerifyToken] Verifying token`);
-
-      if (!req.token) {
-        return { valid: false, message: "Token is required" };
-      }
-
-      try {
-        const decoded = jwt.verify(req.token, env.JWT_SECRET, { algorithms: ["HS256"] }) as JwtPayload;
-        console.log(`[VerifyToken] Token is valid for uid: ${decoded.uid}`);
-        return {
-          valid: true,
-          uid: decoded.uid,
-          message: "Token is valid"
-        };
-      } catch (error) {
-        console.log(`[VerifyToken] Token verification failed: ${(error as Error).message}`);
-        return {
-          valid: false,
-          message: error instanceof Error ? error.message : "Invalid token"
-        };
-      }
     },
   });

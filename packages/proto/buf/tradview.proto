@@ -7,6 +7,7 @@ import "google/protobuf/timestamp.proto";
 message PriceData {
   string ticker = 1;
   string price = 2;
+  string change = 3;
   google.protobuf.Timestamp timestamp = 4;
 }
 
@@ -86,17 +87,17 @@ message GenerateTokenResponse {
   string token = 1;
 }
 
-message VerifyTokenRequest {
-  string token = 1;
-}
-
-message VerifyTokenResponse {
-  bool valid = 1;
-  string message = 2;
-  optional string uid = 3;
-}
+// message VerifyTokenRequest {
+//   string token = 1;
+// }
+//
+// message VerifyTokenResponse {
+//   bool valid = 1;
+//   string message = 2;
+//   optional string uid = 3;
+// }
 
 service AuthService {
   rpc GenerateToken(GenerateTokenRequest) returns (GenerateTokenResponse) {}
-  rpc VerifyToken(VerifyTokenRequest) returns (VerifyTokenResponse) {}
+  // rpc VerifyToken(VerifyTokenRequest) returns (VerifyTokenResponse) {}
 }
